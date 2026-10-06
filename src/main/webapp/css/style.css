@@ -124,3 +124,20 @@ body {
 .result-card.error h1 {
     color: #e03131;
 }
+
+/* --- Liên kết phụ (đăng ký / quên mật khẩu) --- */
+.auth-link {
+    margin-top: 20px;
+    color: #888888;
+    font-size: 14px;
+}
+
+.auth-link a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
