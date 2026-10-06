@@ -4,6 +4,20 @@ Dự án **Maven Webapp** chuẩn cho Java JSP/Servlet, tương thích **Apache 
 
 Chức năng: form đăng nhập đơn giản — nhập `username = admin` và `password = admin` sẽ in ra **"Welcome admin to website"**, sai thì in **"Login Error"**.
 
+## Phân chia Frontend / Backend
+
+Dự án tách rõ ràng hai phần theo mô hình MVC (Model 2):
+
+| Phần | Trách nhiệm | Vị trí |
+|------|-------------|--------|
+| **Frontend** (View) | Giao diện hiển thị: form đăng nhập, trang kết quả, CSS. KHÔNG chứa logic nghiệp vụ. | `src/main/webapp/` |
+| **Backend** (Controller) | Xử lý nghiệp vụ: nhận request, kiểm tra username/password, forward kết quả. KHÔNG tự sinh HTML. | `src/main/java/` |
+
+Luồng hoạt động:
+1. Người dùng mở `index.jsp` (frontend) → điền form.
+2. Form POST tới `/login` → `LoginServlet` (backend) xử lý nghiệp vụ.
+3. Servlet đặt kết quả vào request scope rồi forward sang `result.jsp` (frontend) hiển thị.
+
 ## Cấu trúc dự án (đầy đủ)
 
 ```
@@ -13,9 +27,12 @@ ServletLogin/
 ├── .mvn/wrapper/maven-wrapper.properties
 └── src/main/
     ├── java/com/codegym/
-    │   └── LoginServlet.java                ← @WebServlet("/login"), xử lý POST đăng nhập
-    └── webapp/
-        ├── index.jsp                        ← Form đăng nhập (POST tới /login)
+    │   └── LoginServlet.java                ← BACKEND: @WebServlet("/login"), xử lý POST, forward sang result.jsp
+    └── webapp/                              ← FRONTEND
+        ├── index.jsp                        ← View: form đăng nhập (POST tới /login)
+        ├── result.jsp                       ← View: hiển thị kết quả (dùng EL nhận dữ liệu từ servlet)
+        ├── css/
+        │   └── style.css                    ← CSS dùng chung cho các view
         └── WEB-INF/
             └── web.xml                      ← Jakarta Servlet 6.0 (welcome-file index.jsp)
 ```
@@ -40,3 +57,4 @@ File WAR tạo tại: `target/jsp-servlet-login.war`
 
 - **Tomcat 10.1+ dùng `jakarta.servlet.*`** (KHÔNG phải `javax.servlet.*`).
 - Java 17.
+- View dùng **EL** (`${message}`, `${status}`) thay vì scriptlet để giữ frontend sạch, không trộn code Java.

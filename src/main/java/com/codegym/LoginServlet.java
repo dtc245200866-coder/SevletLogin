@@ -1,5 +1,6 @@
 package com.codegym;
 
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -7,15 +8,22 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 /**
- * Servlet xử lý request POST từ form đăng nhập (/login).
- * Nếu username và password đều là "admin" -> in "Welcome admin to website".
- * Ngược lại -> in "Login Error".
+ * BACKEND — Controller xử lý nghiệp vụ đăng nhập.
+ *
+ * Servlet chỉ làm nhiệm vụ backend:
+ *   1. Nhận username/password từ request.
+ *   2. Kiểm tra thông tin đăng nhập (nghiệp vụ).
+ *   3. Đặt kết quả vào request scope và forward sang JSP (frontend) để hiển thị.
+ *
+ * Servlet KHÔNG tự sinh HTML nữa — phần giao diện nằm hoàn toàn ở frontend.
  */
 @WebServlet(name = "LoginServlet", urlPatterns = {"/login"})
 public class LoginServlet extends HttpServlet {
+
+    private static final String USERNAME = "admin";
+    private static final String PASSWORD = "admin";
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -24,26 +32,20 @@ public class LoginServlet extends HttpServlet {
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        response.setContentType("text/html; charset=UTF-8");
+        // Nghiệp vụ: kiểm tra thông tin đăng nhập
+        boolean success = USERNAME.equals(username) && PASSWORD.equals(password);
 
-        try (PrintWriter out = response.getWriter()) {
-            out.println("<!DOCTYPE html>");
-            out.println("<html lang=\"vi\">");
-            out.println("<head>");
-            out.println("    <meta charset=\"UTF-8\">");
-            out.println("    <title>Kết quả đăng nhập</title>");
-            out.println("</head>");
-            out.println("<body>");
-
-            if ("admin".equals(username) && "admin".equals(password)) {
-                out.println("    <h1>Welcome admin to website</h1>");
-            } else {
-                out.println("    <h1>Login Error</h1>");
-            }
-
-            out.println("    <p><a href=\"index.jsp\">← Về trang đăng nhập</a></p>");
-            out.println("</body>");
-            out.println("</html>");
+        // Đặt kết quả vào request scope để frontend (result.jsp) hiển thị
+        if (success) {
+            request.setAttribute("status", "success");
+            request.setAttribute("message", "Welcome admin to website");
+        } else {
+            request.setAttribute("status", "error");
+            request.setAttribute("message", "Login Error");
         }
+
+        // Forward sang view — backend không tự in HTML
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/result.jsp");
+        dispatcher.forward(request, response);
     }
 }
